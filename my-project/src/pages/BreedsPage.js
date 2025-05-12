@@ -416,21 +416,23 @@ export default class BreedsPage {
         
         card.appendChild(infoSection);
         
-        // Acties container toevoegen
-        const actionsContainer = document.createElement('div');
-        actionsContainer.classList.add('breed-actions');
-        
         // Controleer of het ras al in favorieten staat
         const isFav = isFavorite(breed.id);
         
-        // Favoriet knop
+        // Acties container met favorietenknop
+        const actionsContainer = document.createElement('div');
+        actionsContainer.classList.add('breed-actions');
+        
+        // Favoriet knop toevoegen aan actions container
         const favoriteButton = document.createElement('button');
         favoriteButton.classList.add('favorite-button');
         if (isFav) {
             favoriteButton.classList.add('is-favorite');
-            favoriteButton.innerHTML = '★ ' + this.translations[this.language].removeFromFavorites;
+            favoriteButton.innerHTML = '★';
+            favoriteButton.title = this.translations[this.language].removeFromFavorites;
         } else {
-            favoriteButton.innerHTML = '☆ ' + this.translations[this.language].addToFavorites;
+            favoriteButton.innerHTML = '☆';
+            favoriteButton.title = this.translations[this.language].addToFavorites;
         }
         
         favoriteButton.addEventListener('click', (e) => {
@@ -442,7 +444,8 @@ export default class BreedsPage {
                 // Verwijder uit favorieten
                 removeFavorite(breed.id);
                 favoriteButton.classList.remove('is-favorite');
-                favoriteButton.innerHTML = '☆ ' + this.translations[this.language].addToFavorites;
+                favoriteButton.innerHTML = '☆';
+                favoriteButton.title = this.translations[this.language].addToFavorites;
                 
                 // Toon een notificatie
                 this.showNotification(this.translations[this.language].removedFromFavorites);
@@ -450,7 +453,8 @@ export default class BreedsPage {
                 // Voeg toe aan favorieten
                 addFavorite(breed);
                 favoriteButton.classList.add('is-favorite');
-                favoriteButton.innerHTML = '★ ' + this.translations[this.language].removeFromFavorites;
+                favoriteButton.innerHTML = '★';
+                favoriteButton.title = this.translations[this.language].removeFromFavorites;
                 
                 // Toon een notificatie
                 this.showNotification(this.translations[this.language].addedToFavorites);
