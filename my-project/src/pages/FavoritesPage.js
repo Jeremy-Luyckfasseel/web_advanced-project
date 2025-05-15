@@ -1,12 +1,10 @@
 /*FavoritesPage component - toont een lijst met favoriete hondenrassen*/
 
-import { getFavorites, removeFavorite, getNote } from '../services/storage.service.js';
+import { getFavorites, removeFavorite } from '../services/storage.service.js';
 
-export default class FavoritesPage {
-    constructor() {
+export default class FavoritesPage {    constructor() {
         this.favorites = [];
         this.filteredFavorites = [];
-        this.sortField = 'name';
         this.sortDirection = 'asc';
         this.searchQuery = '';
         this.translations = {
@@ -267,22 +265,7 @@ export default class FavoritesPage {
         const breedName = document.createElement('h3');
         breedName.textContent = favorite.name;
         infoContainer.appendChild(breedName);
-        
-        // Populariteit tonen als die beschikbaar is
-        if (favorite.popularity) {
-            const popularityContainer = document.createElement('div');
-            popularityContainer.classList.add('favorite-popularity');
-            
-            // Sterren voor populariteit
-            for (let i = 0; i < 5; i++) {
-                const star = document.createElement('span');
-                star.classList.add('popularity-star');
-                star.innerHTML = i < Math.ceil(favorite.popularity / 2) ? '★' : '☆';
-                popularityContainer.appendChild(star);
-            }
-            
-            infoContainer.appendChild(popularityContainer);
-        }
+  
         
         // Toon de datum waarop toegevoegd aan favorieten
         if (favorite.dateAdded) {
@@ -293,23 +276,7 @@ export default class FavoritesPage {
             dateAdded.textContent = `Toegevoegd op: ${date.toLocaleDateString()}`;
             infoContainer.appendChild(dateAdded);
         }
-        
-        // Toon notitie indien aanwezig
-        const note = getNote(favorite.id);
-        if (note) {
-            const noteContainer = document.createElement('div');
-            noteContainer.classList.add('favorite-note');
-            
-            const noteLabel = document.createElement('strong');
-            noteLabel.textContent = 'Notitie: ';
-            noteContainer.appendChild(noteLabel);
-            
-            const noteText = document.createElement('span');
-            noteText.textContent = note;
-            noteContainer.appendChild(noteText);
-            
-            infoContainer.appendChild(noteContainer);
-        }
+  
         
         card.appendChild(infoContainer);
         

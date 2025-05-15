@@ -2,7 +2,6 @@
 
 // Constanten voor localStorage keys
 const FAVORITES_KEY = 'dogExplorer_favorites';
-const NOTES_KEY = 'dogExplorer_notes';
 const SETTINGS_KEY = 'dogExplorer_settings';
 
 /*Haalt de lijst van favoriete hondenrassen op uit localStorage*/
@@ -40,31 +39,7 @@ export const isFavorite = (breedId) => {
     return favorites.some(breed => breed.id === breedId);
 };
 
-/*Haalt alle gebruikersnotities op uit localStorage*/
-export const getNotes = () => {
-    const notes = localStorage.getItem(NOTES_KEY);
-    return notes ? JSON.parse(notes) : {};
-};
 
-/*Slaat een notitie op voor een specifiek hondenras*/
-export const saveNote = (breedId, note) => {
-    const notes = getNotes();
-    notes[breedId] = note;
-    localStorage.setItem(NOTES_KEY, JSON.stringify(notes));
-};
-
-/*Verwijdert een notitie voor een specifiek hondenras*/
-export const removeNote = (breedId) => {
-    const notes = getNotes();
-    delete notes[breedId];
-    localStorage.setItem(NOTES_KEY, JSON.stringify(notes));
-};
-
-/*Haalt een notitie op voor een specifiek hondenras*/
-export const getNote = (breedId) => {
-    const notes = getNotes();
-    return notes[breedId] || null;
-};
 
 /*Haalt gebruikersinstellingen op uit localStorage*/
 export const getUserSettings = () => {

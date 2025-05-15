@@ -3,17 +3,14 @@
 import { getAllBreeds, getRandomBreedImage } from '../services/api.service.js';
 import { addFavorite, isFavorite, removeFavorite } from '../services/storage.service.js';
 
-export default class BreedsPage {
-    constructor() {
+export default class BreedsPage {    constructor() {
         this.breeds = [];
         this.filteredBreeds = [];
         this.loading = false;
         this.error = null;
-        this.sortField = 'name';
         this.sortDirection = 'asc';
         this.searchQuery = '';
         this.filterLetter = '';
-        this.observer = null;
         this.translations = {
             nl: {
                 title: 'Hondenrassen',
@@ -25,9 +22,7 @@ export default class BreedsPage {
                 za: 'Z-A',
                 noResults: 'Geen hondenrassen gevonden die aan je zoekcriteria voldoen.',
                 loading: 'Hondenrassen worden geladen...',
-                error: 'Er is een fout opgetreden bij het laden van de hondenrassen. Probeer het later opnieuw.',
-                subBreeds: 'Subrassen',
-                popularity: 'Populariteit',
+                error: 'Er is een fout opgetreden bij het laden van de hondenrassen. Probeer het later opnieuw.',                subBreeds: 'Subrassen',
                 index: 'Nr.',
                 name: 'Naam',
                 image: 'Foto',
@@ -46,9 +41,7 @@ export default class BreedsPage {
                 za: 'Z-A',
                 noResults: 'No dog breeds found matching your search criteria.',
                 loading: 'Loading dog breeds...',
-                error: 'An error occurred while loading dog breeds. Please try again later.',
-                subBreeds: 'Sub-breeds',
-                popularity: 'Popularity',
+                error: 'An error occurred while loading dog breeds. Please try again later.',                subBreeds: 'Sub-breeds',
                 index: 'No.',
                 name: 'Name',
                 image: 'Photo',
@@ -200,15 +193,10 @@ export default class BreedsPage {
             // Converteer object naar een array met gestructureerde data
             const breedsArray = Object.entries(breedsObject).map(([name, subBreeds], index) => {
                 const breedId = name.toLowerCase();
-                
-                // Bepaal een willekeurige populariteitsscore tussen 1-10
-                const popularity = Math.floor(Math.random() * 10) + 1;
-                
-                return {
+                          return {
                     id: breedId,
                     name: name.charAt(0).toUpperCase() + name.slice(1), // Hoofdletter
                     subBreeds: subBreeds,
-                    popularity: popularity,
                     index: index + 1,
                     imageUrl: null, // Zal later worden ingevuld
                 };
@@ -334,22 +322,7 @@ export default class BreedsPage {
         breedName.classList.add('breed-name');
         breedName.textContent = breed.name;
         cardHeader.appendChild(breedName);
-        
-        // Populariteit indicator
-        const popularityContainer = document.createElement('div');
-        popularityContainer.classList.add('breed-popularity');
-        popularityContainer.title = `${this.translations[this.language].popularity}: ${breed.popularity}/10`;
-        
-        // Gebruik sterren om populariteit aan te geven
-        for (let i = 0; i < 5; i++) {
-            const star = document.createElement('span');
-            star.classList.add('popularity-star');
-            // Volle of lege ster op basis van populariteit
-            star.innerHTML = i < Math.ceil(breed.popularity / 2) ? '★' : '☆';
-            popularityContainer.appendChild(star);
-        }
-        
-        cardHeader.appendChild(popularityContainer);
+  
         card.appendChild(cardHeader);
         
         // Afbeelding container
@@ -388,15 +361,32 @@ export default class BreedsPage {
             image.alt = 'Geen afbeelding beschikbaar';
             loadingIndicator.remove();
         }
-        
+          // Voeg de afbeelding toe aan de container zonder witruimte ertussen
         imageContainer.appendChild(image);
         card.appendChild(imageContainer);
         
-        // Informatie over de hond
+        // Informatie over de hond - direct na de afbeelding zonder tussenruimte
         const infoSection = document.createElement('div');
         infoSection.classList.add('breed-info');
         
-        // Toon subrassen als die er zijn
+        // Direct aansluitend toevoegen
+        card.appendChild(infoSection);
+        
+        // Controleer of het ras al in favorieten staat
+        const isFav = isFavorite(breed.id);
+          // Acties container met favorietenknop
+        const actionsContainer = document.createElement('div');
+        actionsContainer.classList.add('breed-actions');
+        
+        // Linker deel van de acties container
+        const actionsLeft = document.createElement('div');
+        actionsLeft.classList.add('breed-actions-left');
+        
+        // Rechter deel van de acties container
+        const actionsRight = document.createElement('div');
+        actionsRight.classList.add('breed-actions-right');
+        
+        // Toon subrassen als die er zijn in het linker deel
         if (breed.subBreeds && breed.subBreeds.length > 0) {
             const subBreedsContainer = document.createElement('div');
             subBreedsContainer.classList.add('sub-breeds');
@@ -411,22 +401,16 @@ export default class BreedsPage {
                 .join(', ');
             subBreedsContainer.appendChild(subBreedsList);
             
-            infoSection.appendChild(subBreedsContainer);
+            // Plaats de subrassen in het linker deel
+            actionsLeft.appendChild(subBreedsContainer);
         }
         
-        card.appendChild(infoSection);
+        // Voeg linker deel toe aan acties container
+        actionsContainer.appendChild(actionsLeft);
         
-        // Controleer of het ras al in favorieten staat
-        const isFav = isFavorite(breed.id);
-        
-        // Acties container met favorietenknop
-        const actionsContainer = document.createElement('div');
-        actionsContainer.classList.add('breed-actions');
-        
-        // Favoriet knop toevoegen aan actions container
+        // Favoriet knop toevoegen aan rechter deel
         const favoriteButton = document.createElement('button');
-        favoriteButton.classList.add('favorite-button');
-        if (isFav) {
+        favoriteButton.classList.add('favorite-button');        if (isFav) {
             favoriteButton.classList.add('is-favorite');
             favoriteButton.innerHTML = '★';
             favoriteButton.title = this.translations[this.language].removeFromFavorites;
@@ -434,8 +418,7 @@ export default class BreedsPage {
             favoriteButton.innerHTML = '☆';
             favoriteButton.title = this.translations[this.language].addToFavorites;
         }
-        
-        favoriteButton.addEventListener('click', (e) => {
+          favoriteButton.addEventListener('click', (e) => {
             e.stopPropagation(); // Voorkom dat de kaart-klik ook wordt getriggerd
             
             const isCurrentlyFavorite = favoriteButton.classList.contains('is-favorite');
@@ -461,7 +444,11 @@ export default class BreedsPage {
             }
         });
         
-        actionsContainer.appendChild(favoriteButton);
+        // Voeg de favorietenknop toe aan het rechter deel
+        actionsRight.appendChild(favoriteButton);
+        
+        // Voeg rechter deel toe aan acties container
+        actionsContainer.appendChild(actionsRight);
         card.appendChild(actionsContainer);
         
         return card;

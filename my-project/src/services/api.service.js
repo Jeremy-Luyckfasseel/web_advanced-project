@@ -37,28 +37,3 @@ export const getRandomBreedImage = async (breed, subBreed = null) => {
     return response.message;
 };
 
-/*Haalt meerdere willekeurige afbeeldingen op van een specifiek hondenras*/
-export const getMultipleRandomBreedImages = async (breed, subBreed = null, count = 3) => {
-    const breedPath = subBreed ? `${breed}/${subBreed}` : breed;
-    const response = await fetchFromAPI(`/breed/${breedPath}/images/random/${count}`);
-    return response.message;
-};
-
-/*Haalt alle afbeeldingen op van een specifiek hondenras*/
-export const getAllBreedImages = async (breed, subBreed = null) => {
-    const breedPath = subBreed ? `${breed}/${subBreed}` : breed;
-    const response = await fetchFromAPI(`/breed/${breedPath}/images`);
-    return response.message;
-};
-
-/*Haalt een lijst van subrassen op voor een specifiek ras*/
-export const getSubBreeds = async (breed) => {
-    const response = await fetchFromAPI(`/breed/${breed}/list`);
-    return response.message;
-};
-
-/*Haalt een willekeurige afbeelding op van een willekeurig hondenras*/
-export const getRandomImage = async () => {
-    const response = await fetchFromAPI('/breeds/image/random');
-    return response.message;
-};
