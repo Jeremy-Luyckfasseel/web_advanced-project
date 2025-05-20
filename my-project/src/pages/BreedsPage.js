@@ -1,7 +1,7 @@
 /*BreedsPage component - toont een lijst met hondenrassen*/
 
 import { getAllBreeds, getRandomBreedImage } from '../services/api.service.js';
-import { addFavorite, isFavorite, removeFavorite } from '../services/storage.service.js';
+import { addFavorite, isFavorite, removeFavorite, getFavorites } from '../services/storage.service.js';
 
 export default class BreedsPage {    constructor() {
         this.breeds = [];
@@ -29,7 +29,10 @@ export default class BreedsPage {    constructor() {
                 addToFavorites: 'Toevoegen aan favorieten',
                 removeFromFavorites: 'Verwijderen uit favorieten',
                 addedToFavorites: 'Toegevoegd aan favorieten!',
-                removedFromFavorites: 'Verwijderd uit favorieten!'
+                removedFromFavorites: 'Verwijderd uit favorieten!',
+                favoritesTitle: 'Jouw favoriete hondenrassen',
+                noFavorites: 'Je hebt nog geen favoriete hondenrassen toegevoegd.',
+                viewAllFavorites: 'Bekijk alle favorieten'
             },
             en: {
                 title: 'Dog Breeds',
@@ -48,13 +51,14 @@ export default class BreedsPage {    constructor() {
                 addToFavorites: 'Add to favorites',
                 removeFromFavorites: 'Remove from favorites',
                 addedToFavorites: 'Added to favorites!',
-                removedFromFavorites: 'Removed from favorites!'
+                removedFromFavorites: 'Removed from favorites!',
+                favoritesTitle: 'Your favorite dog breeds',
+                noFavorites: 'You have not added any favorite dog breeds yet.',
+                viewAllFavorites: 'View all favorites'
             }
         };
         this.language = 'nl'; // Default taal
-    }
-
-    /*Initialize de pagina en laad de data*/
+    }    /*Initialize de pagina en laad de data*/
     async render() {
         const container = document.createElement('div');
         container.classList.add('page-container', 'breeds-page');
@@ -82,6 +86,10 @@ export default class BreedsPage {    constructor() {
             this.loading = true;
             await this.loadBreeds();
             this.renderBreeds(breedsContainer);
+            
+            // Toevoegen favorieten sectie
+            const favoritesSection = this.createFavoritesSection();
+            container.appendChild(favoritesSection);
         } catch (error) {
             console.error('Fout bij laden van hondenrassen:', error);
             breedsContainer.innerHTML = `<div class="error">${this.translations[this.language].error}</div>`;
@@ -423,17 +431,22 @@ export default class BreedsPage {    constructor() {
             
             const isCurrentlyFavorite = favoriteButton.classList.contains('is-favorite');
             
-            if (isCurrentlyFavorite) {
-                // Verwijder uit favorieten
-                removeFavorite(breed.id);
-                favoriteButton.classList.remove('is-favorite');
-                favoriteButton.innerHTML = '☆';
-                favoriteButton.title = this.translations[this.language].addToFavorites;
-                
-                // Toon een notificatie
-                this.showNotification(this.translations[this.language].removedFromFavorites);
-            } else {
-                // Voeg toe aan favorieten
+            if (isCurrentlyFavorite) {            // Verwijder uit favorieten
+            removeFavorite(breed.id);
+            favoriteButton.classList.remove('is-favorite');
+            favoriteButton.innerHTML = '☆';
+            favoriteButton.title = this.translations[this.language].addToFavorites;
+            
+            // Toon een notificatie
+            this.showNotification(this.translations[this.language].removedFromFavorites);
+            
+            // Update de favorieten sectie
+            const favoritesSection = document.getElementById('favorites-section');
+            if (favoritesSection) {
+                const newFavoritesSection = this.createFavoritesSection();
+                favoritesSection.replaceWith(newFavoritesSection);
+            }
+        } else {                // Voeg toe aan favorieten
                 addFavorite(breed);
                 favoriteButton.classList.add('is-favorite');
                 favoriteButton.innerHTML = '★';
@@ -441,9 +454,15 @@ export default class BreedsPage {    constructor() {
                 
                 // Toon een notificatie
                 this.showNotification(this.translations[this.language].addedToFavorites);
+                
+                // Update de favorieten sectie
+                const favoritesSection = document.getElementById('favorites-section');
+                if (favoritesSection) {
+                    const newFavoritesSection = this.createFavoritesSection();
+                    favoritesSection.replaceWith(newFavoritesSection);
+                }
             }
         });
-        
         // Voeg de favorietenknop toe aan het rechter deel
         actionsRight.appendChild(favoriteButton);
         
@@ -478,5 +497,202 @@ export default class BreedsPage {    constructor() {
         setTimeout(() => {
             notification.classList.remove('show');
         }, 2000);
+    }
+
+    /*Favorieten sectie - toont een lijst met favoriete hondenrassen*/
+    async renderFavorites() {
+        const container = document.createElement('div');
+        container.classList.add('favorites-container');
+        
+        // Titel voor de favorieten sectie
+        const favoritesTitle = document.createElement('h3');
+        favoritesTitle.classList.add('favorites-title');
+        favoritesTitle.textContent = this.translations[this.language].favoritesTitle;
+        container.appendChild(favoritesTitle);
+        
+        // Container voor de favoriete rassen
+        const favoritesList = document.createElement('div');
+        favoritesList.classList.add('favorites-list');
+        
+        // Haal favoriete rassen op uit de opslag
+        const favoriteBreeds = Object.keys(localStorage)
+            .filter(key => key.startsWith('favorite_'))
+            .map(key => JSON.parse(localStorage.getItem(key)));
+        
+        if (favoriteBreeds.length === 0) {
+            // Geen favorieten gevonden
+            const noFavoritesMessage = document.createElement('div');
+            noFavoritesMessage.classList.add('no-favorites-message');
+            noFavoritesMessage.textContent = this.translations[this.language].noFavorites;
+            favoritesList.appendChild(noFavoritesMessage);
+        } else {
+            // Toon elk favoriet ras
+            favoriteBreeds.forEach(breed => {
+                const breedCard = this.createBreedCard(breed);
+                favoritesList.appendChild(breedCard);
+            });
+        }
+        
+        container.appendChild(favoritesList);
+        
+        // Bekijk alle favorieten knop
+        const viewAllButton = document.createElement('button');
+        viewAllButton.classList.add('view-all-favorites');
+        viewAllButton.textContent = this.translations[this.language].viewAllFavorites;
+        viewAllButton.addEventListener('click', () => {
+            this.viewAllFavorites();
+        });
+        container.appendChild(viewAllButton);
+        
+        return container;
+    }
+
+    /*Bekijk alle favorieten - navigeer naar de pagina met alle favoriete rassen*/
+    viewAllFavorites() {
+        // Hier zou je de logica toevoegen om naar de pagina met alle favorieten te navigeren
+        // Bijvoorbeeld door het laden van een nieuwe module of het wijzigen van de URL
+        console.log('Bekijk alle favorieten - nog te implementeren');
+    }
+
+    /*Maak een sectie met favoriete hondenrassen*/
+    createFavoritesSection() {
+        // Maak hoofdcontainer voor de favorieten sectie
+        const sectionContainer = document.createElement('div');
+        sectionContainer.classList.add('favorites-section');
+        sectionContainer.id = 'favorites-section';
+        
+        // Sectie titel
+        const sectionTitle = document.createElement('h2');
+        sectionTitle.textContent = this.translations[this.language].favoritesTitle;
+        sectionTitle.classList.add('section-title');
+        sectionContainer.appendChild(sectionTitle);
+        
+        // Haal favorieten op uit localStorage
+        const favorites = getFavorites();
+        
+        if (favorites.length === 0) {
+            // Toon bericht als er geen favorieten zijn
+            const noFavoritesMessage = document.createElement('div');
+            noFavoritesMessage.classList.add('no-favorites-message');
+            noFavoritesMessage.textContent = this.translations[this.language].noFavorites;
+            sectionContainer.appendChild(noFavoritesMessage);
+        } else {
+            // Maak een grid voor de favoriete hondenrassen
+            const favoritesGrid = document.createElement('div');
+            favoritesGrid.classList.add('favorites-grid');
+            
+            // Toon maximaal 4 favorieten (de meest recente)
+            const recentFavorites = [...favorites].sort((a, b) => {
+                return new Date(b.dateAdded) - new Date(a.dateAdded);
+            }).slice(0, 4);
+            
+            // Maak een kaart voor elk favoriet hondenras
+            recentFavorites.forEach(favorite => {
+                const favoriteCard = this.createFavoriteCard(favorite);
+                favoritesGrid.appendChild(favoriteCard);
+            });
+            
+            sectionContainer.appendChild(favoritesGrid);
+            
+            // Voeg een knop toe om naar de volledige favorieten pagina te gaan
+            if (favorites.length > 4) {
+                const viewAllButton = document.createElement('button');
+                viewAllButton.classList.add('view-all-button');
+                viewAllButton.textContent = this.translations[this.language].viewAllFavorites;
+                viewAllButton.addEventListener('click', () => {
+                    window.location.hash = '#/favorites';
+                });
+                sectionContainer.appendChild(viewAllButton);
+            }
+        }
+        
+        return sectionContainer;
+    }
+    
+    /*Maak een kaart voor een favoriet hondenras*/
+    createFavoriteCard(favorite) {
+        const card = document.createElement('div');
+        card.classList.add('favorite-card');
+        card.dataset.breedId = favorite.id;
+        
+        // Afbeelding
+        if (favorite.imageUrl) {
+            const imageContainer = document.createElement('div');
+            imageContainer.classList.add('favorite-image-container');
+            
+            const image = document.createElement('img');
+            image.classList.add('favorite-image');
+            image.src = favorite.imageUrl;
+            image.alt = favorite.name;
+            
+            imageContainer.appendChild(image);
+            card.appendChild(imageContainer);
+        }
+        
+        // Informatie over het ras
+        const infoContainer = document.createElement('div');
+        infoContainer.classList.add('favorite-info');
+        
+        const breedName = document.createElement('h3');
+        breedName.textContent = favorite.name;
+        infoContainer.appendChild(breedName);
+        
+        // Toon de datum waarop toegevoegd aan favorieten
+        if (favorite.dateAdded) {
+            const dateAdded = document.createElement('div');
+            dateAdded.classList.add('date-added');
+            
+            const date = new Date(favorite.dateAdded);
+            dateAdded.textContent = `Toegevoegd op: ${date.toLocaleDateString()}`;
+            infoContainer.appendChild(dateAdded);
+        }
+        
+        card.appendChild(infoContainer);
+        
+        // Verwijder uit favorieten knop
+        const removeButton = document.createElement('button');
+        removeButton.classList.add('remove-favorite-button');
+        removeButton.innerHTML = '★ ' + this.translations[this.language].removeFromFavorites;
+        removeButton.addEventListener('click', (e) => {
+            e.stopPropagation();
+            
+            // Verwijder uit favorieten
+            removeFavorite(favorite.id);
+            
+            // Update de UI
+            card.remove();
+            
+            // Toon notificatie
+            this.showNotification(this.translations[this.language].removedFromFavorites);
+            
+            // Update de favorieten sectie als er geen favorieten meer zijn
+            const favoritesGrid = document.querySelector('.favorites-grid');
+            if (!favoritesGrid || favoritesGrid.children.length === 0) {
+                const favoritesSection = document.getElementById('favorites-section');
+                if (favoritesSection) {
+                    favoritesSection.innerHTML = '';
+                    favoritesSection.appendChild(this.createFavoritesSection());
+                }
+            }
+            
+            // Update ook de favoriet status in de breed-cards als die bestaan
+            const breedCard = document.querySelector(`.breed-card[data-breed-id="${favorite.id}"]`);
+            if (breedCard) {
+                const favoriteButton = breedCard.querySelector('.favorite-button');
+                if (favoriteButton) {
+                    favoriteButton.classList.remove('is-favorite');
+                    favoriteButton.innerHTML = '☆';
+                    favoriteButton.title = this.translations[this.language].addToFavorites;
+                }
+            }
+        });
+        
+        // Voeg verwijder knop toe aan de kaart
+        const buttonContainer = document.createElement('div');
+        buttonContainer.classList.add('favorite-actions');
+        buttonContainer.appendChild(removeButton);
+        card.appendChild(buttonContainer);
+        
+        return card;
     }
 }

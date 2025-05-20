@@ -486,7 +486,7 @@ input:focus, select:focus, textarea:focus {
 
 .breed-info {
   /* padding: 1rem; */
-  flex: 1;
+  /* flex: 1; */
   margin: 0;
   /* padding-top: 1rem; */
   border-top: 1px solid var(--border-color);
@@ -497,7 +497,7 @@ input:focus, select:focus, textarea:focus {
 .breed-actions {
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  /* align-items: center; */
   padding: 0.5rem;
   border-top: 1px solid var(--border-color);
 }
@@ -666,7 +666,7 @@ input:focus, select:focus, textarea:focus {
   margin: 0;
   opacity: 1;
   display: flex;
-  align-items: center;
+  /* align-items: center; */
 }
 
 /* Responsive aanpassingen */

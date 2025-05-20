@@ -1,4 +1,5 @@
 import './style.css';
+import './favorites-section.css';
 import Layout from './components/Layout.js';
 import BreedsPage from './pages/BreedsPage.js';
 import { getUserSettings } from './services/storage.service.js';
