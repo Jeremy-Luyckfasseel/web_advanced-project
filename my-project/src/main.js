@@ -1,72 +1,100 @@
 import './style.css';
 import './favorites-section.css';
 import Layout from './components/Layout.js';
+import Router from './router.js';
 import BreedsPage from './pages/BreedsPage.js';
 import { getUserSettings } from './services/storage.service.js';
 
 /*Initialiseer de applicatie wanneer DOM geladen is*/
 document.addEventListener('DOMContentLoaded', async () => {
-  // Laad gebruikersinstellingen
+  // Laad default instellingen
   const settings = getUserSettings();
-  document.body.setAttribute('data-theme', settings.theme || 'light');
+  document.body.setAttribute('data-theme', 'light');
   
+  // We need to set up the app container first
   const appContainer = document.getElementById('app');
   
-  // Maak layout voor de pagina
-  const layout = new Layout();
-  appContainer.appendChild(layout.render());
+  // Define routes for the application
+  // These will replace the entire app container as per your router.js implementation
+  const routes = {
+    '/': (container) => {
+      // Reset container and add layout first
+      container.innerHTML = '';
+      const layout = new Layout();
+      container.appendChild(layout.render());
+      
+      // Get the main content area that was just created by the layout
+      const mainContent = document.getElementById('main-content');
+      
+      // Add the breeds page content
+      const breedsPage = new BreedsPage();
+      breedsPage.render().then(breedsContent => {
+        mainContent.appendChild(breedsContent);
+        
+        // Trigger a custom event to update the active nav link
+        window.dispatchEvent(new CustomEvent('routeChanged', { detail: { path: '/' } }));
+      });
+    },
+    '/breeds': (container) => {
+      // Reset container and add layout first
+      container.innerHTML = '';
+      const layout = new Layout();
+      container.appendChild(layout.render());
+      
+      // Get the main content area that was just created by the layout
+      const mainContent = document.getElementById('main-content');
+      
+      // Add the breeds page content
+      const breedsPage = new BreedsPage();
+      breedsPage.render().then(breedsContent => {
+        mainContent.appendChild(breedsContent);
+        
+        // Trigger a custom event to update the active nav link
+        window.dispatchEvent(new CustomEvent('routeChanged', { detail: { path: '/breeds' } }));
+      });
+    },
+    '/404': (container) => {
+      // Reset container and add layout first
+      container.innerHTML = '';
+      const layout = new Layout();
+      container.appendChild(layout.render());
+      
+      // Get the main content area that was just created by the layout
+      const mainContent = document.getElementById('main-content');
+      
+      mainContent.innerHTML = '<div class="error-page"><h2>Pagina niet gevonden</h2><p>De pagina die je zoekt bestaat niet.</p></div>';
+    }
+  };
   
-  // Krijg referentie naar main content gebied
-  const mainContent = document.getElementById('main-content');
-  
-  // Sectie toevoegen voor de BreedsPage
-  const breedsSection = document.createElement('section');
-  breedsSection.id = 'breeds-section';
-  breedsSection.classList.add('app-section');
-  
-  // Titel voor breeds sectie
-  const breedsTitle = document.createElement('h2');
-  breedsTitle.textContent = 'Hondenrassen';
-  breedsTitle.classList.add('section-title');
-  breedsSection.appendChild(breedsTitle);
-  
-  // Render breed content (async)
-  const breedsPage = new BreedsPage();
-  const breedsContent = await breedsPage.render();
-  breedsSection.appendChild(breedsContent);
-  mainContent.appendChild(breedsSection);
+  // Initialize the router - only passing routes as your router.js expects
+  const router = new Router(routes);
   
   // Voeg "terug naar boven" button toe
   addScrollTopButton();
 });
 
-/*Maak een scheidingselement tussen secties*/
-function createSectionDivider() {
-  const divider = document.createElement('div');
-  divider.classList.add('section-divider');
-  return divider;
-}
-
-/*Voeg een "Terug naar boven" knop toe*/
+/*Voeg een knop toe om terug naar boven te scrollen*/
 function addScrollTopButton() {
-  const scrollTopButton = document.createElement('button');
-  scrollTopButton.classList.add('scroll-top-button');
-  scrollTopButton.innerHTML = '&uarr;';
-  scrollTopButton.title = 'Terug naar boven';
+  const scrollButton = document.createElement('button');
+  scrollButton.textContent = '↑';
+  scrollButton.classList.add('scroll-top-button');
+  scrollButton.title = 'Terug naar boven';
   
-  // Toon de knop alleen als gebruiker naar beneden heeft gescrolld
+  scrollButton.addEventListener('click', () => {
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth'
+    });
+  });
+  
+  document.body.appendChild(scrollButton);
+  
+  // Toon de knop alleen als de gebruiker naar beneden heeft gescrold
   window.addEventListener('scroll', () => {
-    if (window.pageYOffset > 300) {
-      scrollTopButton.classList.add('visible');
+    if (window.scrollY > 300) {
+      scrollButton.classList.add('visible');
     } else {
-      scrollTopButton.classList.remove('visible');
+      scrollButton.classList.remove('visible');
     }
   });
-  
-  // Scroll terug naar boven bij klik
-  scrollTopButton.addEventListener('click', () => {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  });
-  
-  document.body.appendChild(scrollTopButton);
 }

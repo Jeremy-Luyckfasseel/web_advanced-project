@@ -2,7 +2,6 @@
 
 // Constanten voor localStorage keys
 const FAVORITES_KEY = 'dogExplorer_favorites';
-const SETTINGS_KEY = 'dogExplorer_settings';
 
 /*Haalt de lijst van favoriete hondenrassen op uit localStorage*/
 export const getFavorites = () => {
@@ -23,6 +22,9 @@ export const addFavorite = (breed) => {
             dateAdded: new Date().toISOString()
         });
         localStorage.setItem(FAVORITES_KEY, JSON.stringify(favorites));
+        
+        // Trigger een storage event zodat andere componenten weten dat er iets veranderd is
+        window.dispatchEvent(new Event('favoritesUpdated'));
     }
 };
 
@@ -31,6 +33,9 @@ export const removeFavorite = (breedId) => {
     let favorites = getFavorites();
     favorites = favorites.filter(breed => breed.id !== breedId);
     localStorage.setItem(FAVORITES_KEY, JSON.stringify(favorites));
+    
+    // Trigger een storage event zodat andere componenten weten dat er iets veranderd is
+    window.dispatchEvent(new Event('favoritesUpdated'));
 };
 
 /*Controleert of een hondenras in de favorieten staat*/
@@ -39,22 +44,17 @@ export const isFavorite = (breedId) => {
     return favorites.some(breed => breed.id === breedId);
 };
 
-
-
-/*Haalt gebruikersinstellingen op uit localStorage*/
+/*Haalt default instellingen op*/
 export const getUserSettings = () => {
-    const settings = localStorage.getItem(SETTINGS_KEY);
-    return settings ? JSON.parse(settings) : {
+    return {
         theme: 'light',
         language: 'nl',
         itemsPerPage: 12
     };
 };
 
-/*Slaat gebruikersinstellingen op in localStorage*/
+/*Placeholder functie voor compatibiliteit*/
 export const saveUserSettings = (settings) => {
-    // Merge met bestaande instellingen
-    const currentSettings = getUserSettings();
-    const updatedSettings = { ...currentSettings, ...settings };
-    localStorage.setItem(SETTINGS_KEY, JSON.stringify(updatedSettings));
+    // Deze functie doet niets meer, maar blijft behouden voor compatibiliteit
+    // met bestaande code dat mogelijk deze functie aanroept
 };

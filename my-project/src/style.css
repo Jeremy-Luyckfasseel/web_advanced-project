@@ -221,6 +221,7 @@ input:focus, select:focus, textarea:focus {
   font-weight: 500;
   position: relative;
   padding: 0.5rem 0;
+  transition: color 0.2s, transform 0.2s;
 }
 
 .main-nav a::after {
@@ -238,8 +239,41 @@ input:focus, select:focus, textarea:focus {
   width: 100%;
 }
 
+.main-nav a:hover {
+  color: var(--primary-color);
+}
+
 .main-nav a.active::after {
   width: 100%;
+}
+
+.main-nav a.active {
+  font-weight: 700;
+  color: var(--primary-color);
+}
+
+.main-nav .favorites-link {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.main-nav .favorites-link:hover {
+  transform: scale(1.05);
+}
+
+.favorites-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--primary-color);
+  color: white;
+  border-radius: 50%;
+  width: 20px;
+  height: 20px;
+  font-size: 0.8rem;
+  font-weight: bold;
+  margin-left: 5px;
 }
 
 .main-content {
@@ -284,83 +318,6 @@ input:focus, select:focus, textarea:focus {
   margin: 0 auto;
 }
 
-/* Homepage styling */
-.hero-section {
-  text-align: center;
-  padding: 3rem 1.5rem;
-  margin-bottom: 3rem;
-  background: linear-gradient(135deg, var(--secondary-color), var(--primary-color));
-  color: white;
-  border-radius: 10px;
-  box-shadow: 0 5px 15px var(--shadow-color);
-}
-
-.hero-section h1 {
-  font-size: 3rem;
-  color: white;
-  margin-bottom: 1rem;
-}
-
-.cta-button {
-  margin-top: 1.5rem;
-  padding: 0.8em 1.8em;
-  font-size: 1.1em;
-  background-color: white;
-  color: var(--primary-color);
-  font-weight: bold;
-  border: none;
-  border-radius: 6px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  transition: transform 0.2s, box-shadow 0.2s;
-}
-
-.cta-button:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 6px 10px rgba(0, 0, 0, 0.15);
-}
-
-.features-section {
-  margin-bottom: 3rem;
-}
-
-.features-section h2 {
-  text-align: center;
-  margin-bottom: 2rem;
-}
-
-.features-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 2rem;
-}
-
-.feature-card {
-  background-color: var(--card-background);
-  border-radius: 10px;
-  padding: 1.5rem;
-  text-align: center;
-  box-shadow: 0 4px 6px var(--shadow-color);
-  transition: transform 0.2s, box-shadow 0.2s;
-  cursor: pointer;
-}
-
-.feature-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 8px 15px var(--shadow-color);
-}
-
-.feature-icon {
-  font-size: 3rem;
-  margin-bottom: 1rem;
-}
-
-.about-section {
-  background-color: var(--card-background);
-  padding: 2rem;
-  border-radius: 10px;
-  box-shadow: 0 4px 6px var(--shadow-color);
-}
-
 /* Controls container */
 .controls-container {
   display: flex;
@@ -388,6 +345,22 @@ input:focus, select:focus, textarea:focus {
   display: flex;
   align-items: center;
   gap: 0.5rem;
+}
+
+.subbreed-filter-container {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.subbreed-selector {
+  min-width: 140px;
+  background-color: var(--card-background);
+  border: 1px solid var(--border-color);
+  color: var(--text-color);
+  padding: 0.5rem;
+  border-radius: 4px;
+  cursor: pointer;
 }
 
 .sort-container {
@@ -542,6 +515,29 @@ input:focus, select:focus, textarea:focus {
   opacity: 1;
 }
 
+/* Favorites button styling */
+.favorites-button {
+  background-color: var(--secondary-color);
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 0.5rem 1rem;
+  cursor: pointer;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  transition: background-color 0.2s;
+}
+
+.favorites-button:hover {
+  background-color: var(--primary-color);
+}
+
+.favorites-button::before {
+  content: '★';
+  margin-right: 0.5rem;
+}
+
 /* Loading, error, no results states */
 .loading, .error, .no-results {
   padding: 2rem;
@@ -620,46 +616,6 @@ input:focus, select:focus, textarea:focus {
   margin-bottom: 1rem;
 }
 
-/* Settings styling */
-.settings-form {
-  background-color: var(--card-background);
-  padding: 2rem;
-  border-radius: 10px;
-  box-shadow: 0 4px 8px var(--shadow-color);
-}
-
-.settings-section {
-  margin-bottom: 2rem;
-}
-
-.form-group {
-  margin-bottom: 1rem;
-}
-
-.form-group label {
-  display: block;
-  margin-bottom: 0.5rem;
-  font-weight: 500;
-}
-
-.settings-buttons {
-  display: flex;
-  gap: 1rem;
-  margin-top: 2rem;
-}
-
-.settings-status {
-  margin-top: 1rem;
-  padding: 0.5rem;
-  text-align: center;
-  border-radius: 6px;
-}
-
-.settings-status.success {
-  background-color: var(--success-color);
-  color: white;
-}
-
 /* Sub-breeds styling */
 .sub-breeds {
   font-size: 0.9rem;
@@ -667,6 +623,14 @@ input:focus, select:focus, textarea:focus {
   opacity: 1;
   display: flex;
   /* align-items: center; */
+}
+
+/* Section separator */
+.section-separator {
+  height: 2px;
+  background: linear-gradient(to right, transparent, var(--primary-color), transparent);
+  margin: 3rem 0;
+  width: 100%;
 }
 
 /* Responsive aanpassingen */
@@ -680,10 +644,11 @@ input:focus, select:focus, textarea:focus {
   .main-header {
     flex-direction: column;
     padding: 1rem;
+    gap: 0.8rem;
   }
   
   .logo {
-    margin-bottom: 1rem;
+    margin-bottom: 0;
   }
   
   .main-nav {
@@ -694,6 +659,7 @@ input:focus, select:focus, textarea:focus {
     width: 100%;
     justify-content: space-around;
     gap: 0.5rem;
+    padding: 0;
   }
   
   .features-grid {
@@ -705,12 +671,8 @@ input:focus, select:focus, textarea:focus {
     align-items: stretch;
   }
   
-  .search-container, .letter-filter-container, .sort-container {
+  .search-container, .letter-filter-container, .subbreed-filter-container, .sort-container {
     width: 100%;
-  }
-  
-  .settings-buttons {
-    flex-direction: column;
   }
 }
 
@@ -755,13 +717,6 @@ input:focus, select:focus, textarea:focus {
   background: var(--primary-color);
   margin: 0.5rem auto;
   border-radius: 2px;
-}
-
-.section-divider {
-  height: 2px;
-  background: linear-gradient(to right, transparent, var(--border-color), transparent);
-  margin: 3rem 0;
-  width: 100%;
 }
 
 /* Scroll to top button */
@@ -833,4 +788,16 @@ input:focus, select:focus, textarea:focus {
 .notification.show {
   transform: translateX(-50%) translateY(0);
   opacity: 1;
+}
+
+/* Favorites section styling */
+.favorites-title {
+  color: var(--secondary-color);
+  font-size: 2.2rem;
+  margin-top: 1rem;
+}
+
+.favorites-title::after {
+  background: var(--secondary-color);
+  width: 120px;
 }

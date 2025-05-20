@@ -3,7 +3,8 @@
 import { getAllBreeds, getRandomBreedImage } from '../services/api.service.js';
 import { addFavorite, isFavorite, removeFavorite, getFavorites } from '../services/storage.service.js';
 
-export default class BreedsPage {    constructor() {
+export default class BreedsPage {
+    constructor() {
         this.breeds = [];
         this.filteredBreeds = [];
         this.loading = false;
@@ -11,6 +12,7 @@ export default class BreedsPage {    constructor() {
         this.sortDirection = 'asc';
         this.searchQuery = '';
         this.filterLetter = '';
+        this.selectedSubBreed = ''; // New property for sub-breed filtering
         this.translations = {
             nl: {
                 title: 'Hondenrassen',
@@ -20,9 +22,14 @@ export default class BreedsPage {    constructor() {
                 sort: 'Sorteer',
                 az: 'A-Z',
                 za: 'Z-A',
+                subBreedFilter: 'Filter op subras',
+                hasSubBreeds: 'Heeft subrassen',
+                noSubBreeds: 'Geen subrassen',
+                allBreeds: 'Alle rassen',
                 noResults: 'Geen hondenrassen gevonden die aan je zoekcriteria voldoen.',
                 loading: 'Hondenrassen worden geladen...',
-                error: 'Er is een fout opgetreden bij het laden van de hondenrassen. Probeer het later opnieuw.',                subBreeds: 'Subrassen',
+                error: 'Er is een fout opgetreden bij het laden van de hondenrassen. Probeer het later opnieuw.',
+                subBreeds: 'Subrassen',
                 index: 'Nr.',
                 name: 'Naam',
                 image: 'Foto',
@@ -32,7 +39,8 @@ export default class BreedsPage {    constructor() {
                 removedFromFavorites: 'Verwijderd uit favorieten!',
                 favoritesTitle: 'Jouw favoriete hondenrassen',
                 noFavorites: 'Je hebt nog geen favoriete hondenrassen toegevoegd.',
-                viewAllFavorites: 'Bekijk alle favorieten'
+                viewAllFavorites: 'Bekijk alle favorieten',
+                scrollToFavorites: 'Naar favorieten'
             },
             en: {
                 title: 'Dog Breeds',
@@ -42,9 +50,14 @@ export default class BreedsPage {    constructor() {
                 sort: 'Sort',
                 az: 'A-Z',
                 za: 'Z-A',
+                subBreedFilter: 'Filter by sub-breed',
+                hasSubBreeds: 'Has sub-breeds',
+                noSubBreeds: 'No sub-breeds',
+                allBreeds: 'All breeds',
                 noResults: 'No dog breeds found matching your search criteria.',
                 loading: 'Loading dog breeds...',
-                error: 'An error occurred while loading dog breeds. Please try again later.',                subBreeds: 'Sub-breeds',
+                error: 'An error occurred while loading dog breeds. Please try again later.',
+                subBreeds: 'Sub-breeds',
                 index: 'No.',
                 name: 'Name',
                 image: 'Photo',
@@ -54,11 +67,14 @@ export default class BreedsPage {    constructor() {
                 removedFromFavorites: 'Removed from favorites!',
                 favoritesTitle: 'Your favorite dog breeds',
                 noFavorites: 'You have not added any favorite dog breeds yet.',
-                viewAllFavorites: 'View all favorites'
+                viewAllFavorites: 'View all favorites',
+                scrollToFavorites: 'Go to favorites'
             }
         };
         this.language = 'nl'; // Default taal
-    }    /*Initialize de pagina en laad de data*/
+    }
+
+    /*Initialize de pagina en laad de data*/
     async render() {
         const container = document.createElement('div');
         container.classList.add('page-container', 'breeds-page');
@@ -87,7 +103,12 @@ export default class BreedsPage {    constructor() {
             await this.loadBreeds();
             this.renderBreeds(breedsContainer);
             
-            // Toevoegen favorieten sectie
+            // Voeg een visual separator toe voor de favorieten sectie
+            const separator = document.createElement('div');
+            separator.classList.add('section-separator');
+            container.appendChild(separator);
+            
+            // Voeg favorieten sectie toe
             const favoritesSection = this.createFavoritesSection();
             container.appendChild(favoritesSection);
         } catch (error) {
@@ -154,6 +175,42 @@ export default class BreedsPage {    constructor() {
         
         letterFilterContainer.appendChild(letterSelector);
         
+        // Filter op subrassen
+        const subBreedContainer = document.createElement('div');
+        subBreedContainer.classList.add('subbreed-filter-container');
+        
+        const subBreedLabel = document.createElement('label');
+        subBreedLabel.textContent = `${this.translations[this.language].subBreedFilter}: `;
+        subBreedContainer.appendChild(subBreedLabel);
+        
+        const subBreedSelector = document.createElement('select');
+        subBreedSelector.classList.add('subbreed-selector');
+        
+        // "Alle" optie
+        const allSubBreedsOption = document.createElement('option');
+        allSubBreedsOption.value = '';
+        allSubBreedsOption.textContent = this.translations[this.language].allBreeds;
+        subBreedSelector.appendChild(allSubBreedsOption);
+        
+        // Met subrassen optie
+        const hasSubBreedsOption = document.createElement('option');
+        hasSubBreedsOption.value = 'has-subbreeds';
+        hasSubBreedsOption.textContent = this.translations[this.language].hasSubBreeds;
+        subBreedSelector.appendChild(hasSubBreedsOption);
+        
+        // Zonder subrassen optie
+        const noSubBreedsOption = document.createElement('option');
+        noSubBreedsOption.value = 'no-subbreeds';
+        noSubBreedsOption.textContent = this.translations[this.language].noSubBreeds;
+        subBreedSelector.appendChild(noSubBreedsOption);
+        
+        subBreedSelector.addEventListener('change', (e) => {
+            this.selectedSubBreed = e.target.value;
+            this.filterBreeds();
+        });
+        
+        subBreedContainer.appendChild(subBreedSelector);
+        
         // Sorteer opties
         const sortContainer = document.createElement('div');
         sortContainer.classList.add('sort-container');
@@ -185,10 +242,28 @@ export default class BreedsPage {    constructor() {
         
         sortContainer.appendChild(sortSelector);
         
+        // Snelle navigatie naar favorieten
+        const quickNavContainer = document.createElement('div');
+        quickNavContainer.classList.add('quick-nav-container');
+        
+        const quickNavButton = document.createElement('button');
+        quickNavButton.classList.add('quick-nav-button');
+        quickNavButton.textContent = this.translations[this.language].scrollToFavorites;
+        quickNavButton.addEventListener('click', () => {
+            const favoritesSection = document.getElementById('favorites-section');
+            if (favoritesSection) {
+                favoritesSection.scrollIntoView({ behavior: 'smooth' });
+            }
+        });
+        
+        quickNavContainer.appendChild(quickNavButton);
+        
         // Controls toevoegen aan container
         controlsContainer.appendChild(searchContainer);
         controlsContainer.appendChild(letterFilterContainer);
+        controlsContainer.appendChild(subBreedContainer);
         controlsContainer.appendChild(sortContainer);
+        controlsContainer.appendChild(quickNavContainer);
         
         return controlsContainer;
     }
@@ -201,7 +276,8 @@ export default class BreedsPage {    constructor() {
             // Converteer object naar een array met gestructureerde data
             const breedsArray = Object.entries(breedsObject).map(([name, subBreeds], index) => {
                 const breedId = name.toLowerCase();
-                          return {
+                
+                return {
                     id: breedId,
                     name: name.charAt(0).toUpperCase() + name.slice(1), // Hoofdletter
                     subBreeds: subBreeds,
@@ -253,7 +329,7 @@ export default class BreedsPage {    constructor() {
         }
     }
 
-    /*Filter hondenrassen op basis van zoekquery en geselecteerde letter*/
+    /*Filter hondenrassen op basis van zoekquery, geselecteerde letter en sub-ras filter*/
     filterBreeds() {
         // Begin met alle rassen
         let filtered = [...this.breeds];
@@ -270,6 +346,22 @@ export default class BreedsPage {    constructor() {
             filtered = filtered.filter(breed => 
                 breed.name.toLowerCase().startsWith(this.filterLetter)
             );
+        }
+        
+        // Filter op sub-ras status
+        if (this.selectedSubBreed) {
+            if (this.selectedSubBreed === 'has-subbreeds') {
+                // Toon alleen rassen met sub-rassen
+                filtered = filtered.filter(breed => 
+                    breed.subBreeds && breed.subBreeds.length > 0
+                );
+            } else if (this.selectedSubBreed === 'no-subbreeds') {
+                // Toon alleen rassen zonder sub-rassen
+                filtered = filtered.filter(breed => 
+                    !breed.subBreeds || breed.subBreeds.length === 0
+                );
+            }
+            // Als 'all' is geselecteerd, geen extra filter nodig
         }
         
         this.filteredBreeds = filtered;
@@ -330,7 +422,7 @@ export default class BreedsPage {    constructor() {
         breedName.classList.add('breed-name');
         breedName.textContent = breed.name;
         cardHeader.appendChild(breedName);
-  
+        
         card.appendChild(cardHeader);
         
         // Afbeelding container
@@ -369,7 +461,8 @@ export default class BreedsPage {    constructor() {
             image.alt = 'Geen afbeelding beschikbaar';
             loadingIndicator.remove();
         }
-          // Voeg de afbeelding toe aan de container zonder witruimte ertussen
+        
+        // Voeg de afbeelding toe aan de container zonder witruimte ertussen
         imageContainer.appendChild(image);
         card.appendChild(imageContainer);
         
@@ -382,7 +475,8 @@ export default class BreedsPage {    constructor() {
         
         // Controleer of het ras al in favorieten staat
         const isFav = isFavorite(breed.id);
-          // Acties container met favorietenknop
+        
+        // Acties container met favorietenknop
         const actionsContainer = document.createElement('div');
         actionsContainer.classList.add('breed-actions');
         
@@ -418,7 +512,9 @@ export default class BreedsPage {    constructor() {
         
         // Favoriet knop toevoegen aan rechter deel
         const favoriteButton = document.createElement('button');
-        favoriteButton.classList.add('favorite-button');        if (isFav) {
+        favoriteButton.classList.add('favorite-button');
+        
+        if (isFav) {
             favoriteButton.classList.add('is-favorite');
             favoriteButton.innerHTML = '★';
             favoriteButton.title = this.translations[this.language].removeFromFavorites;
@@ -426,31 +522,42 @@ export default class BreedsPage {    constructor() {
             favoriteButton.innerHTML = '☆';
             favoriteButton.title = this.translations[this.language].addToFavorites;
         }
-          favoriteButton.addEventListener('click', (e) => {
+        
+        favoriteButton.addEventListener('click', (e) => {
             e.stopPropagation(); // Voorkom dat de kaart-klik ook wordt getriggerd
             
             const isCurrentlyFavorite = favoriteButton.classList.contains('is-favorite');
             
-            if (isCurrentlyFavorite) {            // Verwijder uit favorieten
-            removeFavorite(breed.id);
-            favoriteButton.classList.remove('is-favorite');
-            favoriteButton.innerHTML = '☆';
-            favoriteButton.title = this.translations[this.language].addToFavorites;
-            
-            // Toon een notificatie
-            this.showNotification(this.translations[this.language].removedFromFavorites);
-            
-            // Update de favorieten sectie
-            const favoritesSection = document.getElementById('favorites-section');
-            if (favoritesSection) {
-                const newFavoritesSection = this.createFavoritesSection();
-                favoritesSection.replaceWith(newFavoritesSection);
-            }
-        } else {                // Voeg toe aan favorieten
+            if (isCurrentlyFavorite) {
+                // Verwijder uit favorieten
+                removeFavorite(breed.id);
+                favoriteButton.classList.remove('is-favorite');
+                favoriteButton.innerHTML = '☆';
+                favoriteButton.title = this.translations[this.language].addToFavorites;
+                
+                // Toon een notificatie
+                this.showNotification(this.translations[this.language].removedFromFavorites);
+                
+                // Update de favorieten sectie
+                const favoritesSection = document.getElementById('favorites-section');
+                if (favoritesSection) {
+                    const newFavoritesSection = this.createFavoritesSection();
+                    favoritesSection.replaceWith(newFavoritesSection);
+                }
+            } else {
+                // Voeg toe aan favorieten
                 addFavorite(breed);
                 favoriteButton.classList.add('is-favorite');
                 favoriteButton.innerHTML = '★';
                 favoriteButton.title = this.translations[this.language].removeFromFavorites;
+                
+                // Event tonen dat een favoriet is toegevoegd
+                favoriteButton.addEventListener('click', (e) => {
+                    // Als op de star wordt geklikt, navigeer direct naar de favorietenpagina
+                    if (e.target === favoriteButton) {
+                        window.location.hash = '#/favorites';
+                    }
+                }, { once: true });
                 
                 // Toon een notificatie
                 this.showNotification(this.translations[this.language].addedToFavorites);
@@ -463,6 +570,7 @@ export default class BreedsPage {    constructor() {
                 }
             }
         });
+        
         // Voeg de favorietenknop toe aan het rechter deel
         actionsRight.appendChild(favoriteButton);
         
@@ -473,10 +581,7 @@ export default class BreedsPage {    constructor() {
         return card;
     }
 
-    /**
-     * Toon een notificatiebericht aan de gebruiker
-     * @param {string} message - Het bericht om te tonen
-     */
+    /*Toon een notificatiebericht aan de gebruiker*/
     showNotification(message) {
         // Controleer of er al een notificatie-element bestaat
         let notification = document.getElementById('notification');
@@ -564,7 +669,7 @@ export default class BreedsPage {    constructor() {
         // Sectie titel
         const sectionTitle = document.createElement('h2');
         sectionTitle.textContent = this.translations[this.language].favoritesTitle;
-        sectionTitle.classList.add('section-title');
+        sectionTitle.classList.add('section-title', 'favorites-title');
         sectionContainer.appendChild(sectionTitle);
         
         // Haal favorieten op uit localStorage
@@ -581,29 +686,18 @@ export default class BreedsPage {    constructor() {
             const favoritesGrid = document.createElement('div');
             favoritesGrid.classList.add('favorites-grid');
             
-            // Toon maximaal 4 favorieten (de meest recente)
-            const recentFavorites = [...favorites].sort((a, b) => {
+            // Toon alle favorieten, gesorteerd op datum toegevoegd (nieuwste eerst)
+            const sortedFavorites = [...favorites].sort((a, b) => {
                 return new Date(b.dateAdded) - new Date(a.dateAdded);
-            }).slice(0, 4);
+            });
             
             // Maak een kaart voor elk favoriet hondenras
-            recentFavorites.forEach(favorite => {
+            sortedFavorites.forEach(favorite => {
                 const favoriteCard = this.createFavoriteCard(favorite);
                 favoritesGrid.appendChild(favoriteCard);
             });
             
             sectionContainer.appendChild(favoritesGrid);
-            
-            // Voeg een knop toe om naar de volledige favorieten pagina te gaan
-            if (favorites.length > 4) {
-                const viewAllButton = document.createElement('button');
-                viewAllButton.classList.add('view-all-button');
-                viewAllButton.textContent = this.translations[this.language].viewAllFavorites;
-                viewAllButton.addEventListener('click', () => {
-                    window.location.hash = '#/favorites';
-                });
-                sectionContainer.appendChild(viewAllButton);
-            }
         }
         
         return sectionContainer;

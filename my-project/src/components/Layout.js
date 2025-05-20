@@ -5,18 +5,14 @@ import { getUserSettings, saveUserSettings } from '../services/storage.service.j
 
 export default class Layout {
     constructor() {
-        this.settings = getUserSettings();
-        this.theme = this.settings.theme || 'light';
-        this.language = this.settings.language || 'nl';
-        this.initTheme();
-        this.translations = {
-            nl: {
-                title: 'Dog Explorer',
+        this.theme = 'light';
+        this.language = 'nl';
+        this.initTheme();        this.translations = {
+            nl: {                title: 'Dog Explorer',
                 footer: 'Dog Explorer © 2025 | Data geleverd door Dog API',
                 toggleTheme: 'Wissel tussen licht en donker thema'
             },
-            en: {
-                title: 'Dog Explorer',
+            en: {                title: 'Dog Explorer',
                 footer: 'Dog Explorer © 2025 | Data provided by Dog API',
                 toggleTheme: 'Toggle between light and dark theme'
             }
@@ -28,20 +24,15 @@ export default class Layout {
      */
     initTheme() {
         document.body.setAttribute('data-theme', this.theme);
-    }
-
-    /**
+    }    /**
      * Wissel tussen licht en donker thema
      */
     toggleTheme() {
         this.theme = this.theme === 'light' ? 'dark' : 'light';
         document.body.setAttribute('data-theme', this.theme);
         
-        // Sla thema op in localstorage
-        saveUserSettings({ theme: this.theme });
-    }
-
-    /**
+        // We slaan het thema niet meer op
+    }/**
      * Maak de layout structuur
      * @returns {HTMLElement} De layout container
      */
@@ -62,8 +53,23 @@ export default class Layout {
         // Maak footer
         const footer = this.createFooter();
         container.appendChild(footer);
+          // Voeg listener toe voor hashchange om actieve navigatie-item bij te werken
+        window.addEventListener('hashchange', () => {
+            this.updateActiveNavItem();
+        });
+        
+        // Luister ook naar custom routeChanged events
+        window.addEventListener('routeChanged', (event) => {
+            this.updateActiveNavItem();
+        });
 
         return container;
+    }    /**
+     * Update de actieve navigatie-item op basis van de huidige URL hash
+     * (placeholder methode nu we geen navigatie meer hebben)
+     */
+    updateActiveNavItem() {
+        // Deze methode doet nu niets aangezien we de navigatiebalk hebben verwijderd
     }
 
     /**
@@ -72,15 +78,17 @@ export default class Layout {
      */
     createHeader() {
         const header = document.createElement('header');
-        header.classList.add('main-header');
-
-        // Logo/titel sectie
+        header.classList.add('main-header');        // Logo/titel sectie
         const logo = document.createElement('div');
         logo.classList.add('logo');
         
+        const logoLink = document.createElement('a');
+        logoLink.href = '#/breeds';
+        
         const title = document.createElement('h1');
         title.textContent = this.translations[this.language].title;
-        logo.appendChild(title);
+        logoLink.appendChild(title);
+        logo.appendChild(logoLink);
         header.appendChild(logo);
 
         // Thema toggle knop
