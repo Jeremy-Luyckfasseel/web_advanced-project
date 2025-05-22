@@ -52,9 +52,3 @@ export const getUserSettings = () => {
         itemsPerPage: 12
     };
 };
-
-/*Placeholder functie voor compatibiliteit*/
-export const saveUserSettings = (settings) => {
-    // Deze functie doet niets meer, maar blijft behouden voor compatibiliteit
-    // met bestaande code dat mogelijk deze functie aanroept
-};

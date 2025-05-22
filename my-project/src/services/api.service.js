@@ -1,5 +1,6 @@
 /*Service voor API-verzoeken naar de Dog API
- *API-documentatie: https://dog.ceo/dog-api/*/
+ *API-documentatie: https://dog.ceo/dog-api/
+ *Geschreven aan de hand van AI (GitHub Copilot)*/
 
 // Basis-URL voor de Dog API
 const BASE_URL = 'https://dog.ceo/api';

@@ -1,4 +1,5 @@
-/*BreedsPage component - toont een lijst met hondenrassen*/
+/*BreedsPage component - toont een lijst met hondenrassen
+ *Geschreven aan de hand van AI (GitHub Copilot) voor de complexe filtering en sortering functionaliteit*/
 
 import { getAllBreeds, getRandomBreedImage } from '../services/api.service.js';
 import { addFavorite, isFavorite, removeFavorite, getFavorites } from '../services/storage.service.js';
@@ -534,9 +535,8 @@ export default class BreedsPage {
                 favoriteButton.classList.remove('is-favorite');
                 favoriteButton.innerHTML = '☆';
                 favoriteButton.title = this.translations[this.language].addToFavorites;
-                
-                // Toon een notificatie
-                this.showNotification(this.translations[this.language].removedFromFavorites);
+                  // Toon een notificatie
+                this.showNotification(this.translations[this.language].removedFromFavorites, 'info');
                 
                 // Update de favorieten sectie
                 const favoritesSection = document.getElementById('favorites-section');
@@ -544,23 +544,13 @@ export default class BreedsPage {
                     const newFavoritesSection = this.createFavoritesSection();
                     favoritesSection.replaceWith(newFavoritesSection);
                 }
-            } else {
-                // Voeg toe aan favorieten
+            } else {                // Voeg toe aan favorieten
                 addFavorite(breed);
                 favoriteButton.classList.add('is-favorite');
                 favoriteButton.innerHTML = '★';
                 favoriteButton.title = this.translations[this.language].removeFromFavorites;
-                
-                // Event tonen dat een favoriet is toegevoegd
-                favoriteButton.addEventListener('click', (e) => {
-                    // Als op de star wordt geklikt, navigeer direct naar de favorietenpagina
-                    if (e.target === favoriteButton) {
-                        window.location.hash = '#/favorites';
-                    }
-                }, { once: true });
-                
-                // Toon een notificatie
-                this.showNotification(this.translations[this.language].addedToFavorites);
+                  // Toon een notificatie
+                this.showNotification(this.translations[this.language].addedToFavorites, 'success');
                 
                 // Update de favorieten sectie
                 const favoritesSection = document.getElementById('favorites-section');
@@ -579,10 +569,8 @@ export default class BreedsPage {
         card.appendChild(actionsContainer);
         
         return card;
-    }
-
-    /*Toon een notificatiebericht aan de gebruiker*/
-    showNotification(message) {
+    }    /*Toon een notificatiebericht aan de gebruiker*/
+    showNotification(message, type = 'success') {
         // Controleer of er al een notificatie-element bestaat
         let notification = document.getElementById('notification');
         
@@ -593,6 +581,12 @@ export default class BreedsPage {
             notification.classList.add('notification');
             document.body.appendChild(notification);
         }
+        
+        // Reset classes
+        notification.className = 'notification';
+        
+        // Voeg het type toe als class
+        notification.classList.add(`notification-${type}`);
         
         // Update het bericht en maak het zichtbaar
         notification.textContent = message;
@@ -755,9 +749,8 @@ export default class BreedsPage {
             
             // Update de UI
             card.remove();
-            
-            // Toon notificatie
-            this.showNotification(this.translations[this.language].removedFromFavorites);
+              // Toon notificatie
+            this.showNotification(this.translations[this.language].removedFromFavorites, 'info');
             
             // Update de favorieten sectie als er geen favorieten meer zijn
             const favoritesGrid = document.querySelector('.favorites-grid');

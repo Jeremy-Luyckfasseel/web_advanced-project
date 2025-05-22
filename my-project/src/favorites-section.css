@@ -97,7 +97,7 @@
 }
 
 .remove-favorite-button {
-  background-color: var(--error-color);
+  background-color: var(--favorieten-knop);
   color: white;
   border: none;
   padding: 0.5rem 1rem;

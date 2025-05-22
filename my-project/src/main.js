@@ -73,7 +73,8 @@ document.addEventListener('DOMContentLoaded', async () => {
   addScrollTopButton();
 });
 
-/*Voeg een knop toe om terug naar boven te scrollen*/
+/*Voeg een knop toe om terug naar boven te scrollen
+ *Geschreven aan de hand van AI (GitHub Copilot)*/
 function addScrollTopButton() {
   const scrollButton = document.createElement('button');
   scrollButton.textContent = '↑';

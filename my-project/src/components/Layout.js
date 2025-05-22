@@ -1,41 +1,39 @@
 /*Layout component - biedt de basisstructuur voor de single-page applicatie
  *Bevat alleen header en footer zonder navigatie*/
 
-import { getUserSettings, saveUserSettings } from '../services/storage.service.js';
+import { getUserSettings } from '../services/storage.service.js';
 
-export default class Layout {
-    constructor() {
+export default class Layout {    constructor() {
         this.theme = 'light';
         this.language = 'nl';
-        this.initTheme();        this.translations = {
-            nl: {                title: 'Dog Explorer',
+        this.initTheme();        
+        this.translations = {
+            nl: {                
+                title: 'Dog Explorer',
                 footer: 'Dog Explorer © 2025 | Data geleverd door Dog API',
                 toggleTheme: 'Wissel tussen licht en donker thema'
             },
-            en: {                title: 'Dog Explorer',
+            en: {                
+                title: 'Dog Explorer',
                 footer: 'Dog Explorer © 2025 | Data provided by Dog API',
                 toggleTheme: 'Toggle between light and dark theme'
             }
         };
-    }
-
-    /**
-     * Initialiseer thema op basis van gebruikersinstellingen
-     */
+    }    /*Initialiseer thema op basis van gebruikersinstellingen*/
     initTheme() {
         document.body.setAttribute('data-theme', this.theme);
-    }    /**
-     * Wissel tussen licht en donker thema
-     */
+    }    
+
+    /*Wissel tussen licht en donker thema
+     *Geschreven aan de hand van AI (GitHub Copilot)*/
     toggleTheme() {
         this.theme = this.theme === 'light' ? 'dark' : 'light';
         document.body.setAttribute('data-theme', this.theme);
         
         // We slaan het thema niet meer op
-    }/**
-     * Maak de layout structuur
-     * @returns {HTMLElement} De layout container
-     */
+    }
+
+    /*Maak de layout structuur*/
     render() {
         const container = document.createElement('div');
         container.classList.add('layout-container');
@@ -48,34 +46,14 @@ export default class Layout {
         const main = document.createElement('main');
         main.id = 'main-content';
         main.classList.add('main-content');
-        container.appendChild(main);
-
-        // Maak footer
+        container.appendChild(main);        // Maak footer
         const footer = this.createFooter();
         container.appendChild(footer);
-          // Voeg listener toe voor hashchange om actieve navigatie-item bij te werken
-        window.addEventListener('hashchange', () => {
-            this.updateActiveNavItem();
-        });
         
-        // Luister ook naar custom routeChanged events
-        window.addEventListener('routeChanged', (event) => {
-            this.updateActiveNavItem();
-        });
-
         return container;
-    }    /**
-     * Update de actieve navigatie-item op basis van de huidige URL hash
-     * (placeholder methode nu we geen navigatie meer hebben)
-     */
-    updateActiveNavItem() {
-        // Deze methode doet nu niets aangezien we de navigatiebalk hebben verwijderd
-    }
+    }    
 
-    /**
-     * Maak de header
-     * @returns {HTMLElement} Header element
-     */
+    /*Maak de header*/
     createHeader() {
         const header = document.createElement('header');
         header.classList.add('main-header');        // Logo/titel sectie
@@ -105,10 +83,7 @@ export default class Layout {
         return header;
     }
 
-    /**
-     * Maak de footer
-     * @returns {HTMLElement} Footer element
-     */
+    /*Maak de footer*/
     createFooter() {
         const footer = document.createElement('footer');
         footer.classList.add('main-footer');

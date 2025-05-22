@@ -4,9 +4,10 @@
   font-weight: 400;
 
   /* Licht thema kleuren */
-  --primary-color: #ff8c00;
+  --primary-color: #ba4f8f;
   --secondary-color: #2a2a2a;
   --background-color: #ffffff;
+  --favorieten-knop: #db92b8;
   --text-color: #333333;
   --card-background: #f9f9f9;
   --border-color: #e0e0e0;
@@ -25,9 +26,10 @@
 
 /* Donker thema */
 [data-theme="dark"] {
-  --primary-color: #ff9f1c;
+  --primary-color: #ba4f8f;
   --secondary-color: #3a3a3a;
   --background-color: #121212;
+  --favorieten-knop: #db92b8;
   --text-color: #e0e0e0;
   --card-background: #1e1e1e;
   --border-color: #333333;
@@ -103,7 +105,7 @@ button {
   font-size: 1em;
   font-weight: 500;
   font-family: inherit;
-  background-color: var(--primary-color);
+  background-color: var(--favorieten-knop);
   color: var(--button-text);
   cursor: pointer;
   transition: background-color 0.2s, transform 0.1s;
@@ -775,7 +777,7 @@ input:focus, select:focus, textarea:focus {
   transform: translateX(-50%) translateY(100px);
   background-color: var(--primary-color);
   color: white;
-  padding: 10px 20px;
+  padding: 12px 24px;
   border-radius: 6px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
   z-index: 1000;
@@ -783,11 +785,30 @@ input:focus, select:focus, textarea:focus {
   transition: all 0.3s ease;
   text-align: center;
   font-weight: 500;
+  min-width: 250px;
+  max-width: 80%;
 }
 
 .notification.show {
   transform: translateX(-50%) translateY(0);
   opacity: 1;
+}
+
+/* Different notification types */
+.notification-success {
+  background-color: var(--success-color);
+}
+
+.notification-info {
+  background-color: var(--secondary-color);
+}
+
+.notification-warning {
+  background-color: #e6a23c;
+}
+
+.notification-error {
+  background-color: var(--error-color);
 }
 
 /* Favorites section styling */
